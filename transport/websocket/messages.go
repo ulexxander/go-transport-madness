@@ -4,47 +4,50 @@ import (
 	"encoding/json"
 
 	"github.com/gorilla/websocket"
+	"github.com/pkg/errors"
 )
 
 type eventConnected struct {
 	ConnID int64
 }
 
-func (p *Publisher) writeEventConnected(conn *websocket.Conn, connID int64) {
-	p.writeEvent(conn, "connected", eventConnected{
-		ConnID: connID,
-	})
-}
-
-type messageSuccess struct {
-	Event string
-	Data  interface{}
-}
-
-func (p *Publisher) writeEvent(conn *websocket.Conn, event string, data interface{}) {
-	res := messageSuccess{
-		Event: event,
-		Data:  data,
-	}
-	p.write(conn, res)
-}
-
-func (p *Publisher) write(conn *websocket.Conn, payload interface{}) {
+func write(conn *websocket.Conn, payload interface{}) error {
 	encoded, err := json.Marshal(payload)
 	if err != nil {
-		p.Log.Println("error when encoding websocket message:", err)
-		return
+		return errors.Wrap(err, "failed to encode message")
 	}
 
 	w, err := conn.NextWriter(websocket.TextMessage)
 	if err != nil {
-		p.Log.Println("error when aquiring websocket next writer:", err)
-		return
+		return errors.Wrap(err, "failed to aquire next writer")
 	}
 	defer w.Close()
 
 	if _, err := w.Write(encoded); err != nil {
-		p.Log.Println("error when writing websocket message:", err)
-		return
+		return errors.Wrap(err, "failed to write message")
+	}
+
+	return nil
+}
+
+type messageOut struct {
+	Event string
+	Data  interface{}
+}
+
+func writeEvent(conn *websocket.Conn, event string, data interface{}) error {
+	res := messageOut{
+		Event: event,
+		Data:  data,
+	}
+	return write(conn, res)
+}
+
+func (p *Publisher) broadcast(event string, data interface{}) {
+	for connID, conn := range p.connsByID {
+		if err := writeEvent(conn, event, data); err != nil {
+			p.Log.Printf("failed to broadcast event %s to websocket connection with ID %d\n", event, connID)
+			continue
+		}
 	}
 }

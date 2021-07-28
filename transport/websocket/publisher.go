@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
+	"github.com/ulexxander/transport-madness/services"
 )
 
 type Publisher struct {
@@ -35,13 +36,37 @@ func (p *Publisher) Setup() {
 		p.lastConnID++
 		p.mu.Unlock()
 
-		p.Log.Println("incoming websocket connection id:", connID)
+		p.Log.Printf("incoming websocket connection with id %d\n", connID)
 
-		// TODO: error handling in future
-		p.writeEventConnected(conn, connID)
+		if err := writeEvent(conn, "connected", eventConnected{
+			ConnID: connID,
+		}); err != nil {
+			p.connRemove(connID)
+		}
 	})
 }
 
 func (p *Publisher) initFields() {
 	p.connsByID = make(map[int64]*websocket.Conn)
+}
+
+func (p *Publisher) PublishUserCreated(user *services.User) {
+	p.broadcast("user_created", user)
+}
+
+func (p *Publisher) PublishMessageCreated(msg *services.Message) {
+	p.broadcast("message_created", msg)
+}
+
+func (p *Publisher) connRemove(connID int64) {
+	p.mu.Lock()
+	conn := p.connsByID[connID]
+	delete(p.connsByID, connID)
+	p.mu.Unlock()
+
+	if err := conn.Close(); err != nil {
+		p.Log.Printf("could not close websocket connection with id %d\n", connID)
+		return
+	}
+	p.Log.Printf("removed websocket connection with id %d\n", connID)
 }
