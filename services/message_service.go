@@ -59,7 +59,11 @@ func (ms *MessagesService) MessagesPagination(input MessagesPaginationInput) ([]
 		stop = last
 	}
 
-	return ms.messages[start:stop], nil
+	page := ms.messages[start:stop]
+	if page == nil {
+		return []Message{}, nil
+	}
+	return page, nil
 }
 
 type CreateMessageInput struct {

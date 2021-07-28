@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/pkg/errors"
 	"github.com/ulexxander/transport-madness/services"
@@ -18,32 +19,66 @@ type Responder struct {
 
 func (rs *Responder) Setup() {
 	rs.Mux.HandleFunc("/api/users/all", func(w http.ResponseWriter, r *http.Request) {
-		users := rs.UsersService.UsersAll()
-		rs.respondData(w, users)
+		data := rs.UsersService.UsersAll()
+		rs.respondData(w, data)
 	})
 
 	rs.Mux.HandleFunc("/api/users/create", func(w http.ResponseWriter, r *http.Request) {
 		var input services.UserCreateInput
-		if err := rs.readBody(r, &input); err != nil {
+		if err := requestBody(r, &input); err != nil {
 			rs.respondError(w, err)
 			return
 		}
-		user, err := rs.UsersService.CreateUser(input)
+		data, err := rs.UsersService.CreateUser(input)
 		if err != nil {
 			rs.respondError(w, err)
 			return
 		}
-		rs.respondData(w, user)
+		rs.respondData(w, data)
+	})
+
+	rs.Mux.HandleFunc("/api/messages/pagination", func(w http.ResponseWriter, r *http.Request) {
+		page, err := queryInt(r, "page")
+		if err != nil {
+			rs.respondError(w, err)
+			return
+		}
+		pageSize, err := queryInt(r, "pageSize")
+		if err != nil {
+			rs.respondError(w, err)
+			return
+		}
+		data, err := rs.MessagesService.MessagesPagination(services.MessagesPaginationInput{
+			Page:     page,
+			PageSize: pageSize,
+		})
+		if err != nil {
+			rs.respondError(w, err)
+			return
+		}
+		rs.respondData(w, data)
 	})
 }
 
-func (rs *Responder) readBody(r *http.Request, out interface{}) error {
+func requestBody(r *http.Request, out interface{}) error {
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
 	if err := d.Decode(out); err != nil {
 		return errors.Wrap(err, "invalid body")
 	}
 	return nil
+}
+
+func queryInt(r *http.Request, key string) (int, error) {
+	valStr := r.URL.Query().Get(key)
+	if valStr == "" {
+		return 0, errors.Errorf("query parameter %s is missing", key)
+	}
+	valInt, err := strconv.Atoi(valStr)
+	if err != nil {
+		return 0, err
+	}
+	return valInt, nil
 }
 
 type responseSuccess struct {
