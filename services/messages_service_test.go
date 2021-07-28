@@ -32,7 +32,16 @@ func TestMessageService_CreateMessage(t *testing.T) {
 	r.NoError(err)
 	r.Equal(firstMsgContent, msg.Content)
 
-	msgPage := ms.MessagesPage(MessagesPageInput{0, 5})
+	msgPage, err := ms.MessagesPagination(MessagesPaginationInput{-1, 5})
+	r.ErrorIs(err, ErrPaginationRangeInvalid)
+	r.Nil(msgPage)
+
+	msgPage, err = ms.MessagesPagination(MessagesPaginationInput{0, 0})
+	r.ErrorIs(err, ErrPaginationRangeInvalid)
+	r.Nil(msgPage)
+
+	msgPage, err = ms.MessagesPagination(MessagesPaginationInput{0, 5})
+	r.NoError(err)
 	r.Equal([]Message{*msg}, msgPage)
 
 	us.CreateUser(UserCreateInput{"spammer"})
@@ -41,15 +50,18 @@ func TestMessageService_CreateMessage(t *testing.T) {
 		r.NoError(err)
 	}
 
-	msgPage = ms.MessagesPage(MessagesPageInput{0, 5})
+	msgPage, err = ms.MessagesPagination(MessagesPaginationInput{0, 5})
+	r.NoError(err)
 	r.Len(msgPage, 5)
 	r.Equal("spam 11", msgPage[0].Content)
 
-	msgPage = ms.MessagesPage(MessagesPageInput{1, 5})
+	msgPage, err = ms.MessagesPagination(MessagesPaginationInput{1, 5})
+	r.NoError(err)
 	r.Len(msgPage, 5)
 	r.Equal("spam 6", msgPage[0].Content)
 
-	msgPage = ms.MessagesPage(MessagesPageInput{2, 5})
+	msgPage, err = ms.MessagesPagination(MessagesPaginationInput{2, 5})
+	r.NoError(err)
 	r.Len(msgPage, 3)
 	r.Equal(firstMsgContent, msgPage[2].Content)
 }

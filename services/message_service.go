@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	ErrContentEmpty     = errors.New("content cannot be empty")
-	ErrPageRangeInvalid = errors.New("invalid page range")
+	ErrContentEmpty           = errors.New("content cannot be empty")
+	ErrPaginationRangeInvalid = errors.New("invalid pagination range")
 )
 
 type Message struct {
@@ -27,22 +27,26 @@ func NewMessagesService(usersService *UsersService) *MessagesService {
 	}
 }
 
-type MessagesPageInput struct {
+type MessagesPaginationInput struct {
 	Page     int
 	PageSize int
 }
 
-func (mpi *MessagesPageInput) Validate() error {
+func (mpi *MessagesPaginationInput) Validate() error {
 	if mpi.Page < 0 {
-		return ErrPageRangeInvalid
+		return ErrPaginationRangeInvalid
 	}
 	if mpi.PageSize < 1 {
-		return ErrPageRangeInvalid
+		return ErrPaginationRangeInvalid
 	}
 	return nil
 }
 
-func (ms *MessagesService) MessagesPage(input MessagesPageInput) []Message {
+func (ms *MessagesService) MessagesPagination(input MessagesPaginationInput) ([]Message, error) {
+	if err := input.Validate(); err != nil {
+		return nil, err
+	}
+
 	start := input.Page * input.PageSize
 	stop := (input.Page + 1) * input.PageSize
 	last := len(ms.messages)
@@ -55,7 +59,7 @@ func (ms *MessagesService) MessagesPage(input MessagesPageInput) []Message {
 		stop = last
 	}
 
-	return ms.messages[start:stop]
+	return ms.messages[start:stop], nil
 }
 
 type CreateMessageInput struct {
