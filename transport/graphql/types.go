@@ -14,10 +14,14 @@ func (u User) CreatedAt() graphql.Time {
 	return u.createdAt
 }
 
+func ConvertUser(su services.User) User {
+	return User{su, graphql.Time{Time: su.CreatedAt}}
+}
+
 func ConvertUsers(su []services.User) []User {
 	var cu []User
 	for _, u := range su {
-		cu = append(cu, User{u, graphql.Time{Time: u.CreatedAt}})
+		cu = append(cu, ConvertUser(u))
 	}
 	return cu
 }

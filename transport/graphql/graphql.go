@@ -42,3 +42,12 @@ func (q *Query) UsersAll() ([]User, error) {
 	data := q.UsersService.UsersAll()
 	return ConvertUsers(data), nil
 }
+
+func (q *Query) UserCreate(args struct{ Input services.UserCreateInput }) (*User, error) {
+	data, err := q.UsersService.CreateUser(args.Input)
+	if err != nil {
+		return nil, err
+	}
+	u := ConvertUser(*data)
+	return &u, nil
+}
