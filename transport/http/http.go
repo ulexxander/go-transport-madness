@@ -58,6 +58,20 @@ func (rs *Responder) Setup() {
 		}
 		rs.respondData(w, data)
 	})
+
+	rs.Mux.HandleFunc("/api/messages/create", func(w http.ResponseWriter, r *http.Request) {
+		var input services.MessageCreateInput
+		if err := requestBody(r, &input); err != nil {
+			rs.respondError(w, err)
+			return
+		}
+		data, err := rs.MessagesService.CreateMessage(input)
+		if err != nil {
+			rs.respondError(w, err)
+			return
+		}
+		rs.respondData(w, data)
+	})
 }
 
 func requestBody(r *http.Request, out interface{}) error {

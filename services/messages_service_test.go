@@ -15,20 +15,20 @@ func TestMessageService_CreateMessage(t *testing.T) {
 
 	ms := NewMessagesService(us)
 
-	msg, err := ms.CreateMessage(CreateMessageInput{SenderUsername: "", Content: "abc"})
+	msg, err := ms.CreateMessage(MessageCreateInput{SenderUsername: "", Content: "abc"})
 	r.ErrorIs(err, ErrUsernameEmpty)
 	r.Nil(msg)
 
-	msg, err = ms.CreateMessage(CreateMessageInput{SenderUsername: "abc", Content: ""})
+	msg, err = ms.CreateMessage(MessageCreateInput{SenderUsername: "abc", Content: ""})
 	r.ErrorIs(err, ErrContentEmpty)
 	r.Nil(msg)
 
-	msg, err = ms.CreateMessage(CreateMessageInput{"noname", "hello i do not exist :("})
+	msg, err = ms.CreateMessage(MessageCreateInput{"noname", "hello i do not exist :("})
 	r.Error(err)
 	r.Nil(msg)
 
 	firstMsgContent := "first message"
-	msg, err = ms.CreateMessage(CreateMessageInput{"alex", firstMsgContent})
+	msg, err = ms.CreateMessage(MessageCreateInput{"alex", firstMsgContent})
 	r.NoError(err)
 	r.Equal(firstMsgContent, msg.Content)
 
@@ -46,7 +46,7 @@ func TestMessageService_CreateMessage(t *testing.T) {
 
 	us.CreateUser(UserCreateInput{"spammer"})
 	for i := 0; i < 12; i++ {
-		_, err := ms.CreateMessage(CreateMessageInput{"spammer", fmt.Sprintf("spam %d", i)})
+		_, err := ms.CreateMessage(MessageCreateInput{"spammer", fmt.Sprintf("spam %d", i)})
 		r.NoError(err)
 	}
 

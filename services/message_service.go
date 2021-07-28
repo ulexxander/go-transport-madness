@@ -66,12 +66,12 @@ func (ms *MessagesService) MessagesPagination(input MessagesPaginationInput) ([]
 	return page, nil
 }
 
-type CreateMessageInput struct {
+type MessageCreateInput struct {
 	SenderUsername string
 	Content        string
 }
 
-func (cmi *CreateMessageInput) Validate() error {
+func (cmi *MessageCreateInput) Validate() error {
 	if cmi.SenderUsername == "" {
 		return ErrUsernameEmpty
 	}
@@ -81,7 +81,7 @@ func (cmi *CreateMessageInput) Validate() error {
 	return nil
 }
 
-func (ms *MessagesService) CreateMessage(input CreateMessageInput) (*Message, error) {
+func (ms *MessagesService) CreateMessage(input MessageCreateInput) (*Message, error) {
 	if err := input.Validate(); err != nil {
 		return nil, err
 	}
