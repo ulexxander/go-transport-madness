@@ -39,8 +39,20 @@ func run(log *log.Logger) error {
 	}
 	websocketPublisher.Setup()
 
+	natsURL := "nats://localhost:4222"
+	log.Println("connecting to nats server", natsURL)
+	natsConn, err := stdNats.Connect(natsURL)
+	if err != nil {
+		return errors.Wrap(err, "could not connect to nats")
+	}
+
+	natsPublisher := nats.Publisher{
+		Conn: natsConn,
+		Log:  log,
+	}
+
 	usersService := services.NewUsersService(&websocketPublisher)
-	messagesService := services.NewMessagesService(usersService, &websocketPublisher)
+	messagesService := services.NewMessagesService(usersService, &natsPublisher)
 
 	httpResponder := http.Responder{
 		Mux:             httpMux,
@@ -72,12 +84,6 @@ func run(log *log.Logger) error {
 	}
 	graphqlResponder.Setup()
 
-	natsURL := "nats://localhost:4222"
-	log.Println("connecting to nats server", natsURL)
-	natsConn, err := stdNats.Connect(natsURL)
-	if err != nil {
-		return errors.Wrap(err, "could not connect to nats")
-	}
 	natsResponder := nats.Responder{
 		Conn:            natsConn,
 		UsersService:    usersService,

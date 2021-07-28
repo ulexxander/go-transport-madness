@@ -7,27 +7,25 @@ import (
 	"github.com/pkg/errors"
 )
 
-type responseSuccess struct {
+type reqData struct {
 	Data interface{}
 }
 
-type responseError struct {
+type reqError struct {
 	// TODO: error codes
 	Error string
 }
 
 func (rs *Responder) respondData(msg *nats.Msg, data interface{}) {
-	res := responseSuccess{
+	rs.respond(msg, reqData{
 		Data: data,
-	}
-	rs.respond(msg, res)
+	})
 }
 
 func (rs *Responder) respondError(msg *nats.Msg, err error) {
-	res := responseError{
+	rs.respond(msg, reqError{
 		Error: err.Error(),
-	}
-	rs.respond(msg, res)
+	})
 }
 
 func (rs *Responder) respond(msg *nats.Msg, payload interface{}) {
@@ -39,10 +37,11 @@ func (rs *Responder) respond(msg *nats.Msg, payload interface{}) {
 
 	if err := msg.Respond(encoded); err != nil {
 		rs.Log.Println("error when responding to nats request:", err)
+		return
 	}
 }
 
-func messagePayload(msg *nats.Msg, out interface{}) error {
+func requestPayload(msg *nats.Msg, out interface{}) error {
 	if err := json.Unmarshal(msg.Data, out); err != nil {
 		return errors.Wrap(err, "invalid payload")
 	}

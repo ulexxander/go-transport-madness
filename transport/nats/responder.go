@@ -22,7 +22,7 @@ func (rs *Responder) Setup() {
 
 	rs.Conn.Subscribe("user_create", func(msg *nats.Msg) {
 		var input services.UserCreateInput
-		if err := messagePayload(msg, &input); err != nil {
+		if err := requestPayload(msg, &input); err != nil {
 			rs.respondError(msg, err)
 			return
 		}
@@ -36,7 +36,7 @@ func (rs *Responder) Setup() {
 
 	rs.Conn.Subscribe("messages_pagination", func(msg *nats.Msg) {
 		var input services.MessagesPaginationInput
-		if err := messagePayload(msg, &input); err != nil {
+		if err := requestPayload(msg, &input); err != nil {
 			rs.respondError(msg, err)
 			return
 		}
@@ -50,7 +50,7 @@ func (rs *Responder) Setup() {
 
 	rs.Conn.Subscribe("message_create", func(msg *nats.Msg) {
 		var input services.MessageCreateInput
-		if err := messagePayload(msg, &input); err != nil {
+		if err := requestPayload(msg, &input); err != nil {
 			rs.respondError(msg, err)
 			return
 		}
