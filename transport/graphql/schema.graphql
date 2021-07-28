@@ -1,0 +1,10 @@
+scalar Time
+
+type User {
+  Username: String!
+  CreatedAt: Time!
+}
+
+type Query {
+  usersAll: [User!]!
+}
