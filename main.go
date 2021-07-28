@@ -6,10 +6,12 @@ import (
 	stdHTTP "net/http"
 	"os"
 
+	stdNats "github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	"github.com/ulexxander/transport-madness/services"
 	"github.com/ulexxander/transport-madness/transport/graphql"
 	"github.com/ulexxander/transport-madness/transport/http"
+	"github.com/ulexxander/transport-madness/transport/nats"
 )
 
 func main() {
@@ -42,7 +44,9 @@ func run(log *log.Logger) error {
 	}
 	httpResponder.Setup()
 
-	graphqlSchemaFile, err := os.Open("./transport/graphql/schema.graphql")
+	graphqlSchemaFilepath := "./transport/graphql/schema.graphql"
+	log.Println("opening graphql schema file", graphqlSchemaFilepath)
+	graphqlSchemaFile, err := os.Open(graphqlSchemaFilepath)
 	if err != nil {
 		return errors.Wrap(err, "could not open graphql schema file")
 	}
@@ -62,6 +66,19 @@ func run(log *log.Logger) error {
 	}
 	graphqlResponder.Setup()
 
-	log.Println("listening on", httpAddr)
+	natsURL := "nats://localhost:4222"
+	log.Println("connecting to nats server", natsURL)
+	natsConn, err := stdNats.Connect(natsURL)
+	if err != nil {
+		return errors.Wrap(err, "could not connect to nats")
+	}
+	natsResponder := nats.Responder{
+		Conn:         natsConn,
+		UsersService: usersService,
+		Log:          log,
+	}
+	natsResponder.Setup()
+
+	log.Println("starting http server on", httpAddr)
 	return httpServ.ListenAndServe()
 }
