@@ -4,12 +4,14 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/ulexxander/transport-madness/testutils"
 )
 
 func TestUsersService_CreateUser(t *testing.T) {
 	r := require.New(t)
 
-	us := NewUsersService()
+	publisher := testutils.Publisher{}
+	us := NewUsersService(&publisher)
 
 	users := us.UsersAll()
 	r.Len(users, 0)
