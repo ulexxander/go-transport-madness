@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  nats-server:
+    image: nats
+    ports:
+      - 4222:4222
+
+  nats-inspector:
+    image: ulexxander/nats-inspector
+    ports:
+      - 5005:80
