@@ -12,6 +12,7 @@ import (
 	"github.com/ulexxander/transport-madness/transport/graphql"
 	"github.com/ulexxander/transport-madness/transport/http"
 	"github.com/ulexxander/transport-madness/transport/nats"
+	"github.com/ulexxander/transport-madness/transport/websocket"
 )
 
 func main() {
@@ -79,6 +80,12 @@ func run(log *log.Logger) error {
 		Log:             log,
 	}
 	natsResponder.Setup()
+
+	websocketPublisher := websocket.Publisher{
+		Mux: httpMux,
+		Log: log,
+	}
+	websocketPublisher.Setup()
 
 	log.Println("starting http server on", httpAddr)
 	return httpServ.ListenAndServe()
