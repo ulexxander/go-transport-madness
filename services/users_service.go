@@ -4,29 +4,28 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"github.com/ulexxander/transport-madness/models"
+	"github.com/ulexxander/transport-madness/transport"
 )
 
 var (
 	ErrUsernameEmpty = errors.New("username cannot be empty")
 )
 
-type User struct {
-	Username  string
-	CreatedAt time.Time
-}
-
 type UsersService struct {
-	usersByUsername map[string]User
+	publisher       transport.Publisher
+	usersByUsername map[string]models.User
 }
 
-func NewUsersService() *UsersService {
+func NewUsersService(publisher transport.Publisher) *UsersService {
 	return &UsersService{
-		usersByUsername: make(map[string]User),
+		usersByUsername: make(map[string]models.User),
+		publisher:       publisher,
 	}
 }
 
-func (us *UsersService) UsersAll() []User {
-	users := []User{}
+func (us *UsersService) UsersAll() []models.User {
+	users := []models.User{}
 	for _, user := range us.usersByUsername {
 		users = append(users, user)
 	}
@@ -44,7 +43,7 @@ func (ubui *UserByUsernameInput) Validate() error {
 	return nil
 }
 
-func (us *UsersService) UserByUsername(input UserByUsernameInput) (*User, error) {
+func (us *UsersService) UserByUsername(input UserByUsernameInput) (*models.User, error) {
 	if err := input.Validate(); err != nil {
 		return nil, err
 	}
@@ -68,16 +67,17 @@ func (uci *UserCreateInput) Validate() error {
 	return nil
 }
 
-func (us *UsersService) CreateUser(input UserCreateInput) (*User, error) {
+func (us *UsersService) CreateUser(input UserCreateInput) (*models.User, error) {
 	if err := input.Validate(); err != nil {
 		return nil, err
 	}
 
-	user := User{
+	user := models.User{
 		Username:  input.Username,
 		CreatedAt: time.Now(),
 	}
 
 	us.usersByUsername[input.Username] = user
+	us.publisher.PublishUserCreated(&user)
 	return &user, nil
 }

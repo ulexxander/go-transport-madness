@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"github.com/graph-gophers/graphql-go"
+	"github.com/ulexxander/transport-madness/models"
 	"github.com/ulexxander/transport-madness/services"
 )
 
@@ -10,14 +11,14 @@ type User struct {
 	CreatedAt graphql.Time
 }
 
-func ConvertUser(su services.User) User {
+func ConvertUser(su models.User) User {
 	return User{
 		Username:  su.Username,
 		CreatedAt: graphql.Time{Time: su.CreatedAt},
 	}
 }
 
-func ConvertUsers(su []services.User) []User {
+func ConvertUsers(su []models.User) []User {
 	var cu []User
 	for _, u := range su {
 		cu = append(cu, ConvertUser(u))
@@ -31,7 +32,7 @@ type Message struct {
 	CreatedAt      graphql.Time
 }
 
-func ConvertMessage(sm services.Message) Message {
+func ConvertMessage(sm models.Message) Message {
 	return Message{
 		SenderUsername: sm.SenderUsername,
 		Content:        sm.Content,
@@ -39,7 +40,7 @@ func ConvertMessage(sm services.Message) Message {
 	}
 }
 
-func ConvertMessages(sm []services.Message) []Message {
+func ConvertMessages(sm []models.Message) []Message {
 	var cm []Message
 	for _, m := range sm {
 		cm = append(cm, ConvertMessage(m))

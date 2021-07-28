@@ -3,6 +3,9 @@ package services
 import (
 	"errors"
 	"time"
+
+	"github.com/ulexxander/transport-madness/models"
+	"github.com/ulexxander/transport-madness/transport"
 )
 
 var (
@@ -10,20 +13,16 @@ var (
 	ErrPaginationRangeInvalid = errors.New("invalid pagination range")
 )
 
-type Message struct {
-	SenderUsername string
-	Content        string
-	CreatedAt      time.Time
-}
-
 type MessagesService struct {
 	usersService *UsersService
-	messages     []Message
+	publisher    transport.Publisher
+	messages     []models.Message
 }
 
-func NewMessagesService(usersService *UsersService) *MessagesService {
+func NewMessagesService(usersService *UsersService, publisher transport.Publisher) *MessagesService {
 	return &MessagesService{
 		usersService: usersService,
+		publisher:    publisher,
 	}
 }
 
@@ -42,7 +41,7 @@ func (mpi *MessagesPaginationInput) Validate() error {
 	return nil
 }
 
-func (ms *MessagesService) MessagesPagination(input MessagesPaginationInput) ([]Message, error) {
+func (ms *MessagesService) MessagesPagination(input MessagesPaginationInput) ([]models.Message, error) {
 	if err := input.Validate(); err != nil {
 		return nil, err
 	}
@@ -61,7 +60,7 @@ func (ms *MessagesService) MessagesPagination(input MessagesPaginationInput) ([]
 
 	page := ms.messages[start:stop]
 	if page == nil {
-		return []Message{}, nil
+		return []models.Message{}, nil
 	}
 	return page, nil
 }
@@ -81,7 +80,7 @@ func (cmi *MessageCreateInput) Validate() error {
 	return nil
 }
 
-func (ms *MessagesService) CreateMessage(input MessageCreateInput) (*Message, error) {
+func (ms *MessagesService) CreateMessage(input MessageCreateInput) (*models.Message, error) {
 	if err := input.Validate(); err != nil {
 		return nil, err
 	}
@@ -91,12 +90,14 @@ func (ms *MessagesService) CreateMessage(input MessageCreateInput) (*Message, er
 		return nil, err
 	}
 
-	message := Message{
+	message := models.Message{
 		SenderUsername: user.Username,
 		Content:        input.Content,
 		CreatedAt:      time.Now(),
 	}
 
-	ms.messages = append([]Message{message}, ms.messages...)
+	ms.publisher.PublishMessageCreated(&message)
+
+	ms.messages = append([]models.Message{message}, ms.messages...)
 	return &message, nil
 }

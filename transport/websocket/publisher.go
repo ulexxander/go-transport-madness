@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
-	"github.com/ulexxander/transport-madness/services"
+	"github.com/ulexxander/transport-madness/models"
 )
 
 type Publisher struct {
@@ -50,11 +50,11 @@ func (p *Publisher) initFields() {
 	p.connsByID = make(map[int64]*websocket.Conn)
 }
 
-func (p *Publisher) PublishUserCreated(user *services.User) {
+func (p *Publisher) PublishUserCreated(user *models.User) {
 	p.broadcast("user_created", user)
 }
 
-func (p *Publisher) PublishMessageCreated(msg *services.Message) {
+func (p *Publisher) PublishMessageCreated(msg *models.Message) {
 	p.broadcast("message_created", msg)
 }
 
