@@ -26,16 +26,21 @@ func main() {
 func run(log *log.Logger) error {
 	log.Println("starting service")
 
-	usersService := services.NewUsersService()
-	messagesService := services.NewMessagesService(usersService)
-	var _ = messagesService
-
 	httpAddr := ":4007"
 	httpMux := stdHTTP.NewServeMux()
 	httpServ := stdHTTP.Server{
 		Addr:    httpAddr,
 		Handler: httpMux,
 	}
+
+	websocketPublisher := websocket.Publisher{
+		Mux: httpMux,
+		Log: log,
+	}
+	websocketPublisher.Setup()
+
+	usersService := services.NewUsersService(&websocketPublisher)
+	messagesService := services.NewMessagesService(usersService, &websocketPublisher)
 
 	httpResponder := http.Responder{
 		Mux:             httpMux,
@@ -80,12 +85,6 @@ func run(log *log.Logger) error {
 		Log:             log,
 	}
 	natsResponder.Setup()
-
-	websocketPublisher := websocket.Publisher{
-		Mux: httpMux,
-		Log: log,
-	}
-	websocketPublisher.Setup()
 
 	log.Println("starting http server on", httpAddr)
 	return httpServ.ListenAndServe()
