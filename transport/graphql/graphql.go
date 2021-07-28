@@ -61,3 +61,12 @@ func (q *Query) MessagesPagination(args MessagePaginationArgs) ([]Message, error
 	}
 	return ConvertMessages(data), nil
 }
+
+func (q *Query) MessageCreate(args struct{ Input services.MessageCreateInput }) (*Message, error) {
+	data, err := q.MessagesService.CreateMessage(args.Input)
+	if err != nil {
+		return nil, err
+	}
+	m := ConvertMessage(*data)
+	return &m, nil
+}

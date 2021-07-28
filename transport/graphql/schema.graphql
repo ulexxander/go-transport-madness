@@ -25,6 +25,12 @@ input UserCreateInput {
   Username: String!
 }
 
+input MessagesCreateInput {
+  SenderUsername: String!
+  Content: String!
+}
+
 type Mutation {
   userCreate(input: UserCreateInput!): User
+  messageCreate(input: MessagesCreateInput!): Message
 }
