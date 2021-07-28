@@ -2,29 +2,32 @@ package services
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestUsersService_CreateUser(t *testing.T) {
+	r := require.New(t)
+
 	us := NewUsersService()
 
-	user, err := us.UserByUsername("alex")
-	if err == nil {
-		t.Fatalf("expected to get error, got nil")
-	}
-	if user != nil {
-		t.Fatalf("expected not to get user, got: %v", user)
-	}
+	user, err := us.UserByUsername(UserByUsernameInput{})
+	r.ErrorIs(err, ErrUsernameEmpty)
+	r.Nil(user)
 
-	user = us.CreateUser("alex")
-	if user.Username != "alex" {
-		t.Fatalf("expected created user to have username alex got: %v", user.Username)
-	}
+	user, err = us.CreateUser(UserCreateInput{})
+	r.ErrorIs(err, ErrUsernameEmpty)
+	r.Nil(user)
 
-	user, err = us.UserByUsername("alex")
-	if err != nil {
-		t.Fatalf("unexpected error when getting alex: %s", err)
-	}
-	if user.Username != "alex" {
-		t.Fatalf("expected fetched user to have username alex got: %v", user.Username)
-	}
+	user, err = us.UserByUsername(UserByUsernameInput{"alex"})
+	r.Error(err)
+	r.Nil(user)
+
+	user, err = us.CreateUser(UserCreateInput{"alex"})
+	r.Nil(err)
+	r.Equal("alex", user.Username)
+
+	user, err = us.UserByUsername(UserByUsernameInput{"alex"})
+	r.Nil(err)
+	r.Equal("alex", user.Username)
 }

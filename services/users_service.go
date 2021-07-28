@@ -6,6 +6,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+var (
+	ErrUsernameEmpty = errors.New("username cannot be empty")
+)
+
 type User struct {
 	Username  string
 	CreatedAt time.Time
@@ -21,20 +25,51 @@ func NewUsersService() *UsersService {
 	}
 }
 
-func (us *UsersService) UserByUsername(username string) (*User, error) {
-	user, ok := us.usersByUsername[username]
-	if !ok {
-		return nil, errors.Errorf("user with username %s does not exist", username)
+type UserByUsernameInput struct {
+	Username string
+}
+
+func (ubui *UserByUsernameInput) Validate() error {
+	if ubui.Username == "" {
+		return ErrUsernameEmpty
 	}
+	return nil
+}
+
+func (us *UsersService) UserByUsername(input UserByUsernameInput) (*User, error) {
+	if err := input.Validate(); err != nil {
+		return nil, err
+	}
+
+	user, ok := us.usersByUsername[input.Username]
+	if !ok {
+		return nil, errors.Errorf("user with username %s does not exist", input.Username)
+	}
+
 	return user, nil
 }
 
-func (us *UsersService) CreateUser(username string) *User {
+type UserCreateInput struct {
+	Username string
+}
+
+func (uci *UserCreateInput) Validate() error {
+	if uci.Username == "" {
+		return ErrUsernameEmpty
+	}
+	return nil
+}
+
+func (us *UsersService) CreateUser(input UserCreateInput) (*User, error) {
+	if err := input.Validate(); err != nil {
+		return nil, err
+	}
+
 	user := User{
-		Username:  username,
+		Username:  input.Username,
 		CreatedAt: time.Now(),
 	}
 
-	us.usersByUsername[username] = &user
-	return &user
+	us.usersByUsername[input.Username] = &user
+	return &user, nil
 }
