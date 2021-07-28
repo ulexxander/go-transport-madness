@@ -6,16 +6,15 @@ import (
 )
 
 type User struct {
-	services.User
-	createdAt graphql.Time
-}
-
-func (u User) CreatedAt() graphql.Time {
-	return u.createdAt
+	Username  string
+	CreatedAt graphql.Time
 }
 
 func ConvertUser(su services.User) User {
-	return User{su, graphql.Time{Time: su.CreatedAt}}
+	return User{
+		Username:  su.Username,
+		CreatedAt: graphql.Time{Time: su.CreatedAt},
+	}
 }
 
 func ConvertUsers(su []services.User) []User {
@@ -24,4 +23,40 @@ func ConvertUsers(su []services.User) []User {
 		cu = append(cu, ConvertUser(u))
 	}
 	return cu
+}
+
+type Message struct {
+	SenderUsername string
+	Content        string
+	CreatedAt      graphql.Time
+}
+
+func ConvertMessage(sm services.Message) Message {
+	return Message{
+		SenderUsername: sm.SenderUsername,
+		Content:        sm.Content,
+		CreatedAt:      graphql.Time{Time: sm.CreatedAt},
+	}
+}
+
+func ConvertMessages(sm []services.Message) []Message {
+	var cm []Message
+	for _, m := range sm {
+		cm = append(cm, ConvertMessage(m))
+	}
+	return cm
+}
+
+type MessagePaginationArgs struct {
+	Input struct {
+		Page     int32
+		PageSize int32
+	}
+}
+
+func (mpa *MessagePaginationArgs) Convert() services.MessagesPaginationInput {
+	return services.MessagesPaginationInput{
+		Page:     int(mpa.Input.Page),
+		PageSize: int(mpa.Input.PageSize),
+	}
 }

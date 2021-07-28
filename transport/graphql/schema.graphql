@@ -5,8 +5,20 @@ type User {
   CreatedAt: Time!
 }
 
+type Message {
+  SenderUsername: String!
+  Content: String!
+  CreatedAt: Time!
+}
+
+input MessagesPaginationInput {
+  Page: Int!
+  PageSize: Int!
+}
+
 type Query {
   usersAll: [User!]!
+  messagesPagination(input: MessagesPaginationInput!): [Message!]!
 }
 
 input UserCreateInput {

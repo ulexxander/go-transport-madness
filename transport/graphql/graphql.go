@@ -43,11 +43,21 @@ func (q *Query) UsersAll() ([]User, error) {
 	return ConvertUsers(data), nil
 }
 
-func (q *Query) UserCreate(args struct{ Input services.UserCreateInput }) (*User, error) {
+func (q *Query) UserCreate(args struct {
+	Input services.UserCreateInput
+}) (*User, error) {
 	data, err := q.UsersService.CreateUser(args.Input)
 	if err != nil {
 		return nil, err
 	}
 	u := ConvertUser(*data)
 	return &u, nil
+}
+
+func (q *Query) MessagesPagination(args MessagePaginationArgs) ([]Message, error) {
+	data, err := q.MessagesService.MessagesPagination(args.Convert())
+	if err != nil {
+		return nil, err
+	}
+	return ConvertMessages(data), nil
 }
