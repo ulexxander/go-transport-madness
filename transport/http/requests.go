@@ -38,23 +38,23 @@ type responseError struct {
 	Error string
 }
 
-func (r *Responder) respondData(w http.ResponseWriter, data interface{}) {
+func (rs *Responder) respondData(w http.ResponseWriter, data interface{}) {
 	res := responseSuccess{
 		Data: data,
 	}
-	r.respond(w, res)
+	rs.respond(w, res)
 }
 
-func (r *Responder) respondError(w http.ResponseWriter, err error) {
+func (rs *Responder) respondError(w http.ResponseWriter, err error) {
 	res := responseError{
 		Error: err.Error(),
 	}
-	r.respond(w, res)
+	rs.respond(w, res)
 }
 
-func (r *Responder) respond(w http.ResponseWriter, payload interface{}) {
+func (rs *Responder) respond(w http.ResponseWriter, payload interface{}) {
 	if err := json.NewEncoder(w).Encode(payload); err != nil {
-		r.Log.Println("error when encoding http response:", err)
+		rs.Log.Println("error when encoding http response:", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}

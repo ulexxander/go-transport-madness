@@ -16,29 +16,29 @@ type responseError struct {
 	Error string
 }
 
-func (r *Responder) respondData(msg *nats.Msg, data interface{}) {
+func (rs *Responder) respondData(msg *nats.Msg, data interface{}) {
 	res := responseSuccess{
 		Data: data,
 	}
-	r.respond(msg, res)
+	rs.respond(msg, res)
 }
 
-func (r *Responder) respondError(msg *nats.Msg, err error) {
+func (rs *Responder) respondError(msg *nats.Msg, err error) {
 	res := responseError{
 		Error: err.Error(),
 	}
-	r.respond(msg, res)
+	rs.respond(msg, res)
 }
 
-func (r *Responder) respond(msg *nats.Msg, payload interface{}) {
+func (rs *Responder) respond(msg *nats.Msg, payload interface{}) {
 	encoded, err := json.Marshal(payload)
 	if err != nil {
-		r.Log.Println("error when encoding nats response:", err)
+		rs.Log.Println("error when encoding nats response:", err)
 		return
 	}
 
 	if err := msg.Respond(encoded); err != nil {
-		r.Log.Println("error when responding to nats request:", err)
+		rs.Log.Println("error when responding to nats request:", err)
 	}
 }
 
