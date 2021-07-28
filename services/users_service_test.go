@@ -11,6 +11,9 @@ func TestUsersService_CreateUser(t *testing.T) {
 
 	us := NewUsersService()
 
+	users := us.UsersAll()
+	r.Len(users, 0)
+
 	user, err := us.UserByUsername(UserByUsernameInput{})
 	r.ErrorIs(err, ErrUsernameEmpty)
 	r.Nil(user)
@@ -30,4 +33,7 @@ func TestUsersService_CreateUser(t *testing.T) {
 	user, err = us.UserByUsername(UserByUsernameInput{"alex"})
 	r.Nil(err)
 	r.Equal("alex", user.Username)
+
+	users = us.UsersAll()
+	r.Len(users, 1)
 }

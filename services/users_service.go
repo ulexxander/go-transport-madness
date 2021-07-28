@@ -16,13 +16,21 @@ type User struct {
 }
 
 type UsersService struct {
-	usersByUsername map[string]*User
+	usersByUsername map[string]User
 }
 
 func NewUsersService() *UsersService {
 	return &UsersService{
-		usersByUsername: make(map[string]*User),
+		usersByUsername: make(map[string]User),
 	}
+}
+
+func (us *UsersService) UsersAll() []User {
+	users := []User{}
+	for _, user := range us.usersByUsername {
+		users = append(users, user)
+	}
+	return users
 }
 
 type UserByUsernameInput struct {
@@ -46,7 +54,7 @@ func (us *UsersService) UserByUsername(input UserByUsernameInput) (*User, error)
 		return nil, errors.Errorf("user with username %s does not exist", input.Username)
 	}
 
-	return user, nil
+	return &user, nil
 }
 
 type UserCreateInput struct {
@@ -70,6 +78,6 @@ func (us *UsersService) CreateUser(input UserCreateInput) (*User, error) {
 		CreatedAt: time.Now(),
 	}
 
-	us.usersByUsername[input.Username] = &user
+	us.usersByUsername[input.Username] = user
 	return &user, nil
 }
