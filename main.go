@@ -73,9 +73,10 @@ func run(log *log.Logger) error {
 		return errors.Wrap(err, "could not connect to nats")
 	}
 	natsResponder := nats.Responder{
-		Conn:         natsConn,
-		UsersService: usersService,
-		Log:          log,
+		Conn:            natsConn,
+		UsersService:    usersService,
+		MessagesService: messagesService,
+		Log:             log,
 	}
 	natsResponder.Setup()
 
