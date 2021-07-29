@@ -2,6 +2,8 @@ syntax = "proto3";
 package services;
 option go_package = "./pb";
 
+message Void {}
+
 message Message {
   string SenderUsername = 1;
   string Content = 2;
@@ -13,10 +15,29 @@ message User {
   string CreatedAt = 2;
 }
 
-message Void {}
+message UserAllReply { repeated User Users = 1; }
 
-message TestReply { string Text = 1; }
+message UserCreateRequest { string Username = 1; }
+message UserCreateReply { User User = 1; }
 
-service Test {
-  rpc SomeCall(Void) returns (TestReply) {}
+service Users {
+  rpc All(Void) returns (UserAllReply);
+  rpc Create(UserCreateRequest) returns (UserCreateReply);
+}
+
+message MessageCreateRequest {
+  string SenderUsername = 1;
+  string Content = 2;
+}
+message MessageCreateReply { Message Message = 1; }
+
+message MessagesPaginationRequest {
+  uint64 Page = 1;
+  uint64 PageSize = 2;
+}
+message MessagePaginationReply { repeated Message Messages = 1; }
+
+service Messages {
+  rpc Pagination(MessagesPaginationRequest) returns (MessagePaginationReply) {}
+  rpc Create(MessageCreateRequest) returns (MessageCreateReply) {}
 }

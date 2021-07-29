@@ -14,86 +14,244 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// TestClient is the client API for Test service.
+// UsersClient is the client API for Users service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type TestClient interface {
-	SomeCall(ctx context.Context, in *Void, opts ...grpc.CallOption) (*TestReply, error)
+type UsersClient interface {
+	All(ctx context.Context, in *Void, opts ...grpc.CallOption) (*UserAllReply, error)
+	Create(ctx context.Context, in *UserCreateRequest, opts ...grpc.CallOption) (*UserCreateReply, error)
 }
 
-type testClient struct {
+type usersClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewTestClient(cc grpc.ClientConnInterface) TestClient {
-	return &testClient{cc}
+func NewUsersClient(cc grpc.ClientConnInterface) UsersClient {
+	return &usersClient{cc}
 }
 
-func (c *testClient) SomeCall(ctx context.Context, in *Void, opts ...grpc.CallOption) (*TestReply, error) {
-	out := new(TestReply)
-	err := c.cc.Invoke(ctx, "/services.Test/SomeCall", in, out, opts...)
+func (c *usersClient) All(ctx context.Context, in *Void, opts ...grpc.CallOption) (*UserAllReply, error) {
+	out := new(UserAllReply)
+	err := c.cc.Invoke(ctx, "/services.Users/All", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// TestServer is the server API for Test service.
-// All implementations must embed UnimplementedTestServer
+func (c *usersClient) Create(ctx context.Context, in *UserCreateRequest, opts ...grpc.CallOption) (*UserCreateReply, error) {
+	out := new(UserCreateReply)
+	err := c.cc.Invoke(ctx, "/services.Users/Create", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// UsersServer is the server API for Users service.
+// All implementations must embed UnimplementedUsersServer
 // for forward compatibility
-type TestServer interface {
-	SomeCall(context.Context, *Void) (*TestReply, error)
-	mustEmbedUnimplementedTestServer()
+type UsersServer interface {
+	All(context.Context, *Void) (*UserAllReply, error)
+	Create(context.Context, *UserCreateRequest) (*UserCreateReply, error)
+	mustEmbedUnimplementedUsersServer()
 }
 
-// UnimplementedTestServer must be embedded to have forward compatible implementations.
-type UnimplementedTestServer struct {
+// UnimplementedUsersServer must be embedded to have forward compatible implementations.
+type UnimplementedUsersServer struct {
 }
 
-func (UnimplementedTestServer) SomeCall(context.Context, *Void) (*TestReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SomeCall not implemented")
+func (UnimplementedUsersServer) All(context.Context, *Void) (*UserAllReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method All not implemented")
 }
-func (UnimplementedTestServer) mustEmbedUnimplementedTestServer() {}
+func (UnimplementedUsersServer) Create(context.Context, *UserCreateRequest) (*UserCreateReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
+func (UnimplementedUsersServer) mustEmbedUnimplementedUsersServer() {}
 
-// UnsafeTestServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to TestServer will
+// UnsafeUsersServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to UsersServer will
 // result in compilation errors.
-type UnsafeTestServer interface {
-	mustEmbedUnimplementedTestServer()
+type UnsafeUsersServer interface {
+	mustEmbedUnimplementedUsersServer()
 }
 
-func RegisterTestServer(s grpc.ServiceRegistrar, srv TestServer) {
-	s.RegisterService(&Test_ServiceDesc, srv)
+func RegisterUsersServer(s grpc.ServiceRegistrar, srv UsersServer) {
+	s.RegisterService(&Users_ServiceDesc, srv)
 }
 
-func _Test_SomeCall_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _Users_All_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Void)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TestServer).SomeCall(ctx, in)
+		return srv.(UsersServer).All(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/services.Test/SomeCall",
+		FullMethod: "/services.Users/All",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TestServer).SomeCall(ctx, req.(*Void))
+		return srv.(UsersServer).All(ctx, req.(*Void))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Test_ServiceDesc is the grpc.ServiceDesc for Test service.
+func _Users_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserCreateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UsersServer).Create(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/services.Users/Create",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UsersServer).Create(ctx, req.(*UserCreateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// Users_ServiceDesc is the grpc.ServiceDesc for Users service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Test_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "services.Test",
-	HandlerType: (*TestServer)(nil),
+var Users_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "services.Users",
+	HandlerType: (*UsersServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SomeCall",
-			Handler:    _Test_SomeCall_Handler,
+			MethodName: "All",
+			Handler:    _Users_All_Handler,
+		},
+		{
+			MethodName: "Create",
+			Handler:    _Users_Create_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "transport/grpc/services.proto",
+}
+
+// MessagesClient is the client API for Messages service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+type MessagesClient interface {
+	Pagination(ctx context.Context, in *MessagesPaginationRequest, opts ...grpc.CallOption) (*MessagePaginationReply, error)
+	Create(ctx context.Context, in *MessageCreateRequest, opts ...grpc.CallOption) (*MessageCreateReply, error)
+}
+
+type messagesClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewMessagesClient(cc grpc.ClientConnInterface) MessagesClient {
+	return &messagesClient{cc}
+}
+
+func (c *messagesClient) Pagination(ctx context.Context, in *MessagesPaginationRequest, opts ...grpc.CallOption) (*MessagePaginationReply, error) {
+	out := new(MessagePaginationReply)
+	err := c.cc.Invoke(ctx, "/services.Messages/Pagination", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *messagesClient) Create(ctx context.Context, in *MessageCreateRequest, opts ...grpc.CallOption) (*MessageCreateReply, error) {
+	out := new(MessageCreateReply)
+	err := c.cc.Invoke(ctx, "/services.Messages/Create", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// MessagesServer is the server API for Messages service.
+// All implementations must embed UnimplementedMessagesServer
+// for forward compatibility
+type MessagesServer interface {
+	Pagination(context.Context, *MessagesPaginationRequest) (*MessagePaginationReply, error)
+	Create(context.Context, *MessageCreateRequest) (*MessageCreateReply, error)
+	mustEmbedUnimplementedMessagesServer()
+}
+
+// UnimplementedMessagesServer must be embedded to have forward compatible implementations.
+type UnimplementedMessagesServer struct {
+}
+
+func (UnimplementedMessagesServer) Pagination(context.Context, *MessagesPaginationRequest) (*MessagePaginationReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Pagination not implemented")
+}
+func (UnimplementedMessagesServer) Create(context.Context, *MessageCreateRequest) (*MessageCreateReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
+func (UnimplementedMessagesServer) mustEmbedUnimplementedMessagesServer() {}
+
+// UnsafeMessagesServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to MessagesServer will
+// result in compilation errors.
+type UnsafeMessagesServer interface {
+	mustEmbedUnimplementedMessagesServer()
+}
+
+func RegisterMessagesServer(s grpc.ServiceRegistrar, srv MessagesServer) {
+	s.RegisterService(&Messages_ServiceDesc, srv)
+}
+
+func _Messages_Pagination_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MessagesPaginationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessagesServer).Pagination(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/services.Messages/Pagination",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessagesServer).Pagination(ctx, req.(*MessagesPaginationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Messages_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MessageCreateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MessagesServer).Create(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/services.Messages/Create",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MessagesServer).Create(ctx, req.(*MessageCreateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// Messages_ServiceDesc is the grpc.ServiceDesc for Messages service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var Messages_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "services.Messages",
+	HandlerType: (*MessagesServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Pagination",
+			Handler:    _Messages_Pagination_Handler,
+		},
+		{
+			MethodName: "Create",
+			Handler:    _Messages_Create_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
