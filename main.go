@@ -112,7 +112,9 @@ func run(log *log.Logger) error {
 	}()
 
 	grpcResponder := grpc.Responder{
-		Server: grpcServer,
+		Server:         grpcServer,
+		UsersServer:    &grpc.UsersServer{UsersService: usersService},
+		MessagesServer: &grpc.MessagesServer{MessagesService: messagesService},
 	}
 	grpcResponder.Setup()
 
