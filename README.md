@@ -10,6 +10,7 @@
 ## Implemented Transports
 
 - `graphql` - only Responder (no events)
+- `grpc` - only Responder (no events)
 - `http` - only Responder (no events)
 - `nats` - Responder and Publisher
 - `websocket` - only Publisher (no requests)
