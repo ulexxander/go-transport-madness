@@ -1,0 +1,22 @@
+syntax = "proto3";
+package services;
+option go_package = "./pb";
+
+message Message {
+  string SenderUsername = 1;
+  string Content = 2;
+  string CreatedAt = 3;
+}
+
+message User {
+  string Username = 1;
+  string CreatedAt = 2;
+}
+
+message Void {}
+
+message TestReply { string Text = 1; }
+
+service Test {
+  rpc SomeCall(Void) returns (TestReply) {}
+}
